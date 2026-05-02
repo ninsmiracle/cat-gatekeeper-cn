@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 560" role="img" aria-label="A chubby orange cat">
+  <ellipse cx="410" cy="465" rx="285" ry="45" fill="rgba(0,0,0,0.2)" />
+  <path d="M250 210 C205 120 245 72 320 132 L250 210 Z" fill="#e9883e" />
+  <path d="M570 210 C615 120 575 72 500 132 L570 210 Z" fill="#e9883e" />
+  <path d="M215 232 C215 106 315 64 410 64 C505 64 605 106 605 232 L605 330 C605 440 520 500 410 500 C300 500 215 440 215 330 Z" fill="#f39a46" />
+  <path d="M285 286 C265 255 275 218 306 206 C342 192 375 220 370 260" fill="none" stroke="#d5722f" stroke-width="16" stroke-linecap="round" />
+  <path d="M535 286 C555 255 545 218 514 206 C478 192 445 220 450 260" fill="none" stroke="#d5722f" stroke-width="16" stroke-linecap="round" />
+  <ellipse cx="410" cy="350" rx="150" ry="110" fill="#ffd0a3" />
+  <path d="M376 314 C390 330 430 330 444 314" fill="none" stroke="#5c2f1f" stroke-width="12" stroke-linecap="round" />
+  <path d="M410 326 L410 352" stroke="#5c2f1f" stroke-width="10" stroke-linecap="round" />
+  <path d="M360 372 C382 398 438 398 460 372" fill="none" stroke="#5c2f1f" stroke-width="10" stroke-linecap="round" />
+  <circle cx="322" cy="275" r="14" fill="#3b2218" />
+  <circle cx="498" cy="275" r="14" fill="#3b2218" />
+  <path d="M250 345 C170 372 118 438 132 488 C144 532 230 515 280 448" fill="#f39a46" />
+  <path d="M570 345 C650 372 702 438 688 488 C676 532 590 515 540 448" fill="#f39a46" />
+  <path d="M306 455 C335 530 485 530 514 455" fill="#ffd0a3" />
+  <path d="M260 172 C318 146 360 142 410 142 C460 142 502 146 560 172" fill="none" stroke="#d5722f" stroke-width="12" stroke-linecap="round" />
+  <path d="M276 220 C334 194 366 192 410 192 C454 192 486 194 544 220" fill="none" stroke="#d5722f" stroke-width="10" stroke-linecap="round" />
+  <path d="M292 170 L324 142" stroke="#ffd0a3" stroke-width="14" stroke-linecap="round" />
+  <path d="M528 142 L560 170" stroke="#ffd0a3" stroke-width="14" stroke-linecap="round" />
+</svg>

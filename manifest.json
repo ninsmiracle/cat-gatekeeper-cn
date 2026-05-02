@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Cat Gatekeeper",
+  "description": "A tiny break reminder that lets your cat block distracting websites.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "src/options.html",
+  "action": {
+    "default_title": "Cat Gatekeeper",
+    "default_popup": "src/options.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

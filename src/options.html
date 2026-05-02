@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cat Gatekeeper</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #181818;
+        color: #f4f4f4;
+        margin: 0;
+        min-width: 360px;
+      }
+
+      main {
+        margin: 0 auto;
+        max-width: 720px;
+        padding: 32px;
+      }
+
+      h1 {
+        font-size: 34px;
+        letter-spacing: -0.04em;
+        margin: 0 0 10px;
+        text-align: center;
+      }
+
+      .intro {
+        color: #a9a9a9;
+        font-size: 15px;
+        line-height: 1.6;
+        margin: 0 0 28px;
+        text-align: center;
+      }
+
+      form {
+        display: grid;
+        gap: 22px;
+      }
+
+      label,
+      legend {
+        color: #b9b9b9;
+        display: block;
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      input[type="number"],
+      textarea {
+        background: #2d2d2d;
+        border: 2px solid transparent;
+        border-radius: 14px;
+        color: #fff;
+        font: inherit;
+        font-size: 22px;
+        outline: none;
+        padding: 14px 16px;
+        width: 100%;
+      }
+
+      input[type="number"]:focus,
+      textarea:focus {
+        border-color: #ff6633;
+      }
+
+      textarea {
+        font-size: 16px;
+        line-height: 1.6;
+        min-height: 130px;
+        resize: vertical;
+      }
+
+      fieldset {
+        border: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px 22px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .choice,
+      .toggle {
+        align-items: center;
+        color: #b9b9b9;
+        display: flex;
+        font-size: 18px;
+        font-weight: 700;
+        gap: 10px;
+        margin: 0;
+      }
+
+      input[type="checkbox"] {
+        accent-color: #ff6633;
+        height: 24px;
+        width: 24px;
+      }
+
+      .hint {
+        color: #8f8f8f;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 8px 0 0;
+      }
+
+      .row {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .actions {
+        align-items: center;
+        display: flex;
+        gap: 14px;
+        margin-top: 6px;
+      }
+
+      button {
+        background: #ff6633;
+        border: 0;
+        border-radius: 14px;
+        color: #fff;
+        cursor: pointer;
+        flex: 1;
+        font: inherit;
+        font-size: 20px;
+        font-weight: 900;
+        padding: 18px 22px;
+      }
+
+      button.secondary {
+        background: #2d2d2d;
+        color: #d8d8d8;
+        flex: 0 0 auto;
+      }
+
+      .status {
+        color: #8f8f8f;
+        font-size: 14px;
+        min-height: 20px;
+      }
+
+      @media (max-width: 520px) {
+        main {
+          padding: 26px 22px;
+        }
+
+        .grid,
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Cat Gatekeeper</h1>
+      <p class="intro">刷目标网站太久时，猫猫会霸占屏幕提醒你休息。</p>
+
+      <form id="settings-form">
+        <label class="toggle">
+          <input id="enabled" type="checkbox" />
+          开启猫猫拦截
+        </label>
+
+        <div class="row">
+          <div>
+            <label for="trigger-minutes">几分钟后猫猫出现？</label>
+            <input id="trigger-minutes" min="0.1" max="240" step="0.1" type="number" />
+          </div>
+
+          <div>
+            <label for="break-minutes">休息时间（分钟）</label>
+            <input id="break-minutes" min="0.1" max="60" step="0.1" type="number" />
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>常用目标网站</legend>
+          <div class="grid" id="preset-sites"></div>
+          <p class="hint">勾选后会自动加入下方列表；取消勾选不会删除你手动添加的其他网站。</p>
+        </fieldset>
+
+        <div>
+          <label for="target-sites">自定义网站列表</label>
+          <textarea id="target-sites" spellcheck="false"></textarea>
+          <p class="hint">每行一个域名或 URL，例如 x.com、youtube.com、https://www.bilibili.com。支持简单通配符，例如 https://*.example.com/*。</p>
+        </div>
+
+        <label class="toggle">
+          <input id="sound-enabled" type="checkbox" />
+          猫猫出现时播放提示音
+        </label>
+
+        <div class="actions">
+          <button type="submit">保存</button>
+          <button class="secondary" id="restore-defaults" type="button">恢复默认</button>
+        </div>
+
+        <div class="status" id="status" role="status"></div>
+      </form>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
