@@ -182,6 +182,9 @@ function showCatOverlay(breakMinutes) {
 }
 
 function buildOverlayHtml(totalSeconds) {
+  const catVideoUrl = chrome.runtime.getURL("assets/cat.webm");
+  const fallbackCatUrl = chrome.runtime.getURL("assets/cat.svg");
+
   return `
     <style>
       :host {
@@ -189,95 +192,78 @@ function buildOverlayHtml(totalSeconds) {
       }
 
       .overlay {
-        align-items: center;
-        background:
-          radial-gradient(circle at top left, rgba(255, 143, 90, 0.24), transparent 34%),
-          rgba(0, 0, 0, 0.72);
-        color: #fff;
-        display: flex;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: rgba(0, 0, 0, 0.48);
         inset: 0;
-        justify-content: center;
         position: fixed;
-        text-align: center;
         z-index: 2147483647;
       }
 
-      .card {
-        align-items: center;
+      .cat {
+        animation: cat-breathe 2.4s ease-in-out infinite;
+        filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.55));
+        height: min(96vh, 1080px);
+        left: 50%;
+        object-fit: contain;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        max-width: 96vw;
+      }
+
+      .footer {
+        align-items: flex-start;
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        max-width: min(1280px, calc(100vw - 16px));
-        padding: 18px;
-      }
-
-      .cat {
-        animation: cat-breathe 1.4s ease-in-out infinite;
-        filter: drop-shadow(0 32px 52px rgba(0, 0, 0, 0.48));
-        max-height: min(76vh, 820px);
-        max-width: min(118vw, 1280px);
-        object-fit: contain;
-        transform-origin: center bottom;
-        width: min(118vw, 1280px);
-      }
-
-      .title {
-        font-size: clamp(32px, 5vw, 64px);
-        font-weight: 900;
-        letter-spacing: -0.04em;
-        line-height: 1.02;
-        margin: 0;
-      }
-
-      .subtitle {
-        color: rgba(255, 255, 255, 0.76);
-        font-size: clamp(18px, 2vw, 28px);
-        font-weight: 700;
-        margin: 0;
+        gap: 10px;
+        left: 48px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
       }
 
       .countdown {
-        background: #ff6633;
-        border-radius: 999px;
-        box-shadow: 0 18px 50px rgba(255, 102, 51, 0.32);
         color: #fff;
-        font-size: clamp(34px, 6vw, 72px);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: clamp(52px, 8vw, 110px);
         font-weight: 900;
+        letter-spacing: -0.03em;
         line-height: 1;
-        padding: 18px 34px 22px;
+        text-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.6),
+          0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      .hint {
+        color: rgba(255, 255, 255, 0.75);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: clamp(13px, 1.4vw, 18px);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
       }
 
       @keyframes cat-breathe {
         0%, 100% {
-          transform: rotate(-1deg) scale(1.18);
+          transform: translate(-50%, -50%) scale(1);
         }
 
         50% {
-          transform: rotate(1deg) scale(1.24);
+          transform: translate(-50%, -50%) scale(1.04);
         }
       }
     </style>
 
     <section class="overlay" role="dialog" aria-modal="true" aria-label="Cat break reminder">
-      <div class="card">
-        ${buildCatMedia()}
-        <h1 class="title">猫猫接管屏幕</h1>
-        <p class="subtitle">你已经刷太久了，先休息一下。</p>
+      <video class="cat" autoplay loop muted playsinline poster="${fallbackCatUrl}" aria-label="A chubby orange cat">
+        <source src="${catVideoUrl}" type="video/webm" />
+      </video>
+      <div class="footer">
         <div class="countdown" data-countdown>${formatSeconds(totalSeconds)}</div>
+        <span class="hint">你已经刷太久了，先休息一下。</span>
       </div>
     </section>
-  `;
-}
-
-function buildCatMedia() {
-  const catVideoUrl = chrome.runtime.getURL("assets/cat.webm");
-  const fallbackCatUrl = chrome.runtime.getURL("assets/cat.svg");
-
-  return `
-    <video class="cat" autoplay loop muted playsinline poster="${fallbackCatUrl}" aria-label="A chubby orange cat">
-      <source src="${catVideoUrl}" type="video/webm" />
-    </video>
   `;
 }
 
