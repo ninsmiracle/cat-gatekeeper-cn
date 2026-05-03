@@ -283,7 +283,7 @@
             <input type="file" id="cat-video-input" accept="video/*" />
             <label class="cat-upload-label" for="cat-video-input">
               点击选择视频文件<br />
-              <span>支持 WebM、MP4、MOV 等格式，推荐 20MB 以内</span>
+              <span>推荐 WebM（透明边缘最干净），也支持 MP4 / MOV</span>
             </label>
           </div>
           <div class="cat-preview-wrap" id="cat-preview-wrap">
@@ -293,7 +293,11 @@
               <button type="button" id="cat-clear-btn">恢复默认</button>
             </div>
           </div>
-          <p class="hint">上传后刷新目标网页即可看到效果。文件只保存在本地浏览器中，不会上传到任何服务器。</p>
+          <p class="hint">
+            <strong>优先 WebM 格式</strong>，毛发边缘最干净。MP4/MOV 也可用，黑底会自动转透明，但边缘可能有少量杂边。<br />
+            剪映制作流程：智能抠像剪出猫猫 → 导出 MP4（黑色背景）→ 搜"MP4 转 WebM 在线"找工具转码后再上传。详细教程见 README。<br />
+            文件建议 50MB 以内，最大 150MB。仅保存在本地浏览器，不上传任何服务器。
+          </p>
         </div>
 
         <div class="actions">

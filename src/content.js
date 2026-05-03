@@ -159,14 +159,14 @@ async function showCatOverlay(breakMinutes) {
   const endAt = Date.now() + totalSeconds * 1000;
   STATE.breakUntil = endAt;
 
-  const { catVideoUrl, isObjectUrl } = await resolveCatVideoUrl();
+  const { catVideoUrl, mimeType, isObjectUrl, needsBlackKey } = await resolveCatVideoUrl();
 
   const host = document.createElement("div");
   host.id = "cat-gatekeeper-root";
   document.documentElement.appendChild(host);
 
   const shadow = host.attachShadow({ mode: "closed" });
-  shadow.innerHTML = buildOverlayHtml(totalSeconds, catVideoUrl);
+  shadow.innerHTML = buildOverlayHtml(totalSeconds, catVideoUrl, mimeType, needsBlackKey);
   STATE.overlayRoot = host;
   STATE.overlayLoading = false;
 
@@ -191,16 +191,23 @@ async function showCatOverlay(breakMinutes) {
 }
 
 async function resolveCatVideoUrl() {
+  const defaultResult = {
+    catVideoUrl: chrome.runtime.getURL("assets/cat.webm"),
+    mimeType: "video/webm",
+    isObjectUrl: false,
+    needsBlackKey: false
+  };
+
   try {
     const result = await chrome.storage.local.get("customCatVideoDataUrl");
     const dataUrl = result?.customCatVideoDataUrl;
 
     if (!dataUrl) {
-      return { catVideoUrl: chrome.runtime.getURL("assets/cat.webm"), isObjectUrl: false };
+      return defaultResult;
     }
 
     const mimeMatch = dataUrl.match(/^data:(video\/[^;]+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "video/webm";
+    const mimeType = mimeMatch ? mimeMatch[1] : "video/mp4";
     const base64Data = dataUrl.slice(dataUrl.indexOf(",") + 1);
     const binary = atob(base64Data);
     const bytes = new Uint8Array(binary.length);
@@ -210,14 +217,21 @@ async function resolveCatVideoUrl() {
     }
 
     const blob = new Blob([bytes], { type: mimeType });
-    return { catVideoUrl: URL.createObjectURL(blob), isObjectUrl: true };
+
+    return {
+      catVideoUrl: URL.createObjectURL(blob),
+      mimeType,
+      isObjectUrl: true,
+      needsBlackKey: !mimeType.includes("webm")
+    };
   } catch (_error) {
-    return { catVideoUrl: chrome.runtime.getURL("assets/cat.webm"), isObjectUrl: false };
+    return defaultResult;
   }
 }
 
-function buildOverlayHtml(totalSeconds, catVideoUrl) {
+function buildOverlayHtml(totalSeconds, catVideoUrl, mimeType, needsBlackKey) {
   const fallbackCatUrl = chrome.runtime.getURL("assets/cat.svg");
+  const catClassName = needsBlackKey ? "cat cat--black-key" : "cat";
 
   return `
     <style>
@@ -226,10 +240,15 @@ function buildOverlayHtml(totalSeconds, catVideoUrl) {
       }
 
       .overlay {
-        background: rgba(0, 0, 0, 0.48);
         inset: 0;
         position: fixed;
         z-index: 2147483647;
+      }
+
+      .dim {
+        background: rgba(0, 0, 0, 0.52);
+        inset: 0;
+        position: absolute;
       }
 
       .cat {
@@ -243,6 +262,16 @@ function buildOverlayHtml(totalSeconds, catVideoUrl) {
         transform: translate(-50%, -50%);
         width: auto;
         max-width: 96vw;
+      }
+
+      .cat--black-key {
+        filter: url(#cat-black-to-alpha);
+      }
+
+      .filter-defs {
+        height: 0;
+        position: absolute;
+        width: 0;
       }
 
       .footer {
@@ -290,8 +319,23 @@ function buildOverlayHtml(totalSeconds, catVideoUrl) {
     </style>
 
     <section class="overlay" role="dialog" aria-modal="true" aria-label="Cat break reminder">
-      <video class="cat" autoplay loop muted playsinline poster="${fallbackCatUrl}" aria-label="A chubby orange cat">
-        <source src="${catVideoUrl}" type="video/webm" />
+      ${needsBlackKey ? `
+        <svg class="filter-defs" aria-hidden="true">
+          <defs>
+            <filter id="cat-black-to-alpha" color-interpolation-filters="sRGB">
+              <feColorMatrix type="matrix" values="
+                1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                3 3 3 0 -0.05
+              " />
+            </filter>
+          </defs>
+        </svg>
+      ` : ""}
+      <div class="dim"></div>
+      <video class="${catClassName}" autoplay loop muted playsinline poster="${fallbackCatUrl}" aria-label="A chubby orange cat">
+        <source src="${catVideoUrl}" type="${mimeType}" />
       </video>
       <div class="footer">
         <div class="countdown" data-countdown>${formatSeconds(totalSeconds)}</div>

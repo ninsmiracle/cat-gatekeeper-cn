@@ -78,14 +78,26 @@ async function initCatVideo() {
     const file = videoInput.files?.[0];
     if (!file) return;
 
-    showStatus("正在保存视频…");
+    const MB = 1024 * 1024;
+
+    if (file.size > 150 * MB) {
+      showStatus(`文件太大（${formatFileSize(file.size)}），请压缩到 150MB 以内再上传。剪映导出时选 H.264 编码，不要选"无损"或"RLE"。`);
+      videoInput.value = "";
+      return;
+    }
+
+    if (file.size > 60 * MB) {
+      showStatus(`文件较大（${formatFileSize(file.size)}），正在保存，可能需要几秒…`);
+    } else {
+      showStatus("正在保存视频…");
+    }
 
     try {
       await saveCatVideo(file);
       await renderCatPreview();
       showStatus("猫猫视频已保存，刷新目标网页后生效。");
     } catch (_error) {
-      showStatus("保存失败，视频可能太大，请压缩后重试。");
+      showStatus("保存失败，请把视频压缩到 50MB 以内再试。");
     }
 
     videoInput.value = "";
