@@ -3,7 +3,7 @@
   "name": "Cat Gatekeeper",
   "description": "A tiny break reminder that lets your cat block distracting websites.",
   "version": "0.1.0",
-  "permissions": ["storage"],
+  "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
     "service_worker": "src/background.js"

@@ -43,12 +43,14 @@ const restoreDefaultsButton = document.querySelector("#restore-defaults");
 const statusElement = document.querySelector("#status");
 
 let currentSites = [];
+let catPreviewObjectUrl = null;
 
 init();
 
 async function init() {
   renderPresetSites();
   await loadAndRenderSettings();
+  await initCatVideo();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -66,6 +68,101 @@ async function init() {
     currentSites = parseSites(targetSitesInput.value);
     syncPresetChecks();
   });
+}
+
+async function initCatVideo() {
+  const videoInput = document.querySelector("#cat-video-input");
+  const clearBtn = document.querySelector("#cat-clear-btn");
+
+  videoInput.addEventListener("change", async () => {
+    const file = videoInput.files?.[0];
+    if (!file) return;
+
+    showStatus("正在保存视频…");
+
+    try {
+      await saveCatVideo(file);
+      await renderCatPreview();
+      showStatus("猫猫视频已保存，刷新目标网页后生效。");
+    } catch (_error) {
+      showStatus("保存失败，视频可能太大，请压缩后重试。");
+    }
+
+    videoInput.value = "";
+  });
+
+  clearBtn.addEventListener("click", async () => {
+    await chrome.storage.local.remove("customCatVideoDataUrl");
+    hideCatPreview();
+    showStatus("已恢复默认猫猫视频。");
+  });
+
+  await renderCatPreview();
+}
+
+async function saveCatVideo(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        await chrome.storage.local.set({ customCatVideoDataUrl: reader.result });
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function renderCatPreview() {
+  const result = await chrome.storage.local.get("customCatVideoDataUrl");
+  const dataUrl = result?.customCatVideoDataUrl;
+
+  if (!dataUrl) {
+    hideCatPreview();
+    return;
+  }
+
+  const mimeMatch = dataUrl.match(/^data:(video\/[^;]+);base64,/);
+  const mimeType = mimeMatch ? mimeMatch[1] : "video/webm";
+  const base64Data = dataUrl.slice(dataUrl.indexOf(",") + 1);
+  const bytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+  const blob = new Blob([bytes], { type: mimeType });
+  const sizeLabel = formatFileSize(blob.size);
+
+  if (catPreviewObjectUrl) {
+    URL.revokeObjectURL(catPreviewObjectUrl);
+  }
+  catPreviewObjectUrl = URL.createObjectURL(blob);
+
+  const previewVideo = document.querySelector("#cat-preview");
+  const previewWrap = document.querySelector("#cat-preview-wrap");
+  const metaText = document.querySelector("#cat-meta-text");
+
+  previewVideo.src = catPreviewObjectUrl;
+  metaText.textContent = `已上传自定义视频 · ${sizeLabel}`;
+  previewWrap.classList.add("visible");
+}
+
+function hideCatPreview() {
+  const previewWrap = document.querySelector("#cat-preview-wrap");
+  const previewVideo = document.querySelector("#cat-preview");
+  previewWrap.classList.remove("visible");
+  previewVideo.src = "";
+
+  if (catPreviewObjectUrl) {
+    URL.revokeObjectURL(catPreviewObjectUrl);
+    catPreviewObjectUrl = null;
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function renderPresetSites() {

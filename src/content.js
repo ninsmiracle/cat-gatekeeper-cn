@@ -23,6 +23,7 @@ const STATE = {
   usageSeconds: 0,
   breakUntil: 0,
   overlayRoot: null,
+  overlayLoading: false,
   timerId: null
 };
 
@@ -79,7 +80,7 @@ function tick() {
     return;
   }
 
-  if (Date.now() < STATE.breakUntil || STATE.overlayRoot) {
+  if (Date.now() < STATE.breakUntil || STATE.overlayRoot || STATE.overlayLoading) {
     return;
   }
 
@@ -151,18 +152,23 @@ function normalizeSettings(settings) {
   };
 }
 
-function showCatOverlay(breakMinutes) {
+async function showCatOverlay(breakMinutes) {
+  STATE.overlayLoading = true;
+
   const totalSeconds = Math.max(1, Math.round(breakMinutes * 60));
   const endAt = Date.now() + totalSeconds * 1000;
   STATE.breakUntil = endAt;
+
+  const { catVideoUrl, isObjectUrl } = await resolveCatVideoUrl();
 
   const host = document.createElement("div");
   host.id = "cat-gatekeeper-root";
   document.documentElement.appendChild(host);
 
   const shadow = host.attachShadow({ mode: "closed" });
-  shadow.innerHTML = buildOverlayHtml(totalSeconds);
+  shadow.innerHTML = buildOverlayHtml(totalSeconds, catVideoUrl);
   STATE.overlayRoot = host;
+  STATE.overlayLoading = false;
 
   if (STATE.settings.soundEnabled) {
     playSoftBeep();
@@ -175,14 +181,42 @@ function showCatOverlay(breakMinutes) {
 
     if (secondsLeft <= 0) {
       window.clearInterval(timer);
+      if (isObjectUrl) {
+        URL.revokeObjectURL(catVideoUrl);
+      }
       host.remove();
       STATE.overlayRoot = null;
     }
   }, 250);
 }
 
-function buildOverlayHtml(totalSeconds) {
-  const catVideoUrl = chrome.runtime.getURL("assets/cat.webm");
+async function resolveCatVideoUrl() {
+  try {
+    const result = await chrome.storage.local.get("customCatVideoDataUrl");
+    const dataUrl = result?.customCatVideoDataUrl;
+
+    if (!dataUrl) {
+      return { catVideoUrl: chrome.runtime.getURL("assets/cat.webm"), isObjectUrl: false };
+    }
+
+    const mimeMatch = dataUrl.match(/^data:(video\/[^;]+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "video/webm";
+    const base64Data = dataUrl.slice(dataUrl.indexOf(",") + 1);
+    const binary = atob(base64Data);
+    const bytes = new Uint8Array(binary.length);
+
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+
+    const blob = new Blob([bytes], { type: mimeType });
+    return { catVideoUrl: URL.createObjectURL(blob), isObjectUrl: true };
+  } catch (_error) {
+    return { catVideoUrl: chrome.runtime.getURL("assets/cat.webm"), isObjectUrl: false };
+  }
+}
+
+function buildOverlayHtml(totalSeconds, catVideoUrl) {
   const fallbackCatUrl = chrome.runtime.getURL("assets/cat.svg");
 
   return `
