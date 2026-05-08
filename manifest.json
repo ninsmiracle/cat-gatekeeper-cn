@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Cat Gatekeeper",
-  "description": "A tiny break reminder that lets your cat block distracting websites.",
-  "version": "0.1.0",
+  "name": "猫猫霸屏",
+  "description": "刷B站、抖音、小红书太久？你家猫猫会出来霸占屏幕，强制你休息一下。",
+  "version": "0.1.1",
   "permissions": ["storage", "unlimitedStorage"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
@@ -16,9 +16,18 @@
     }
   ],
   "options_page": "src/options.html",
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
   "action": {
-    "default_title": "Cat Gatekeeper",
-    "default_popup": "src/options.html"
+    "default_title": "猫猫霸屏",
+    "default_popup": "src/options.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png"
+    }
   },
   "web_accessible_resources": [
     {

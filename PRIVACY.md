@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Cat Gatekeeper is designed as a local-only browser extension.
+猫猫霸屏（MaoMao BaPing）is designed as a local-only browser extension.
 
 ## Data Stored
 
@@ -14,11 +14,11 @@ The extension stores these settings in Chrome local storage:
 
 ## Data Collection
 
-Cat Gatekeeper does not collect personal data, browsing history, analytics, cookies, account data, or website content.
+猫猫霸屏 does not collect personal data, browsing history, analytics, cookies, account data, or website content.
 
 ## Data Sharing
 
-Cat Gatekeeper does not send data to any server and does not share data with third parties.
+猫猫霸屏 does not send data to any server and does not share data with third parties.
 
 ## Permissions
 
