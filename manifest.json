@@ -11,7 +11,7 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["src/content.js"],
+      "js": ["src/tease.js", "src/content.js"],
       "run_at": "document_idle"
     }
   ],
@@ -31,7 +31,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["assets/*"],
+      "resources": ["assets/*", "assets/tiedan_ring/*", "assets/tiedan_ring/frames/*"],
       "matches": ["http://*/*", "https://*/*"]
     }
   ]

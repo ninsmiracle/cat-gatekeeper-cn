@@ -1,0 +1,17 @@
+{
+  "frameDir": "frames",
+  "framePattern": "%03d.png",
+  "frameCount": 192,
+  "fps": 24,
+  "width": 720,
+  "startAngle": 225,
+  "clockwise": true,
+  "directionFrames": {
+    "topLeft": 0,
+    "top": 56,
+    "topRight": 80,
+    "bottomRight": 96,
+    "bottom": 120,
+    "bottomLeft": 144
+  }
+}

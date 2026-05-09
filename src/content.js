@@ -15,7 +15,8 @@ const DEFAULT_SETTINGS = {
   ],
   triggerMinutes: 2,
   breakMinutes: 1,
-  soundEnabled: false
+  soundEnabled: false,
+  teaseModeEnabled: false
 };
 
 const STATE = {
@@ -24,6 +25,8 @@ const STATE = {
   breakUntil: 0,
   overlayRoot: null,
   overlayLoading: false,
+  teaseActive: false,
+  teaseTimerId: null,
   timerId: null
 };
 
@@ -53,12 +56,18 @@ async function init() {
       if (!isTargetPage()) {
         STATE.usageSeconds = 0;
       }
+      if ((!STATE.settings.enabled || !isTargetPage()) && STATE.teaseActive) {
+        endTeaseOverlay();
+      }
     }
   });
 
   chrome.runtime.onMessage.addListener((message) => {
     if (message?.type === "cat-gatekeeper:settings-updated") {
       STATE.settings = normalizeSettings(message.settings);
+      if ((!STATE.settings.enabled || !isTargetPage()) && STATE.teaseActive) {
+        endTeaseOverlay();
+      }
     }
   });
 }
@@ -80,7 +89,7 @@ function tick() {
     return;
   }
 
-  if (Date.now() < STATE.breakUntil || STATE.overlayRoot || STATE.overlayLoading) {
+  if (Date.now() < STATE.breakUntil || STATE.overlayRoot || STATE.overlayLoading || STATE.teaseActive) {
     return;
   }
 
@@ -92,7 +101,7 @@ function tick() {
 
   if (STATE.usageSeconds >= STATE.settings.triggerMinutes * 60) {
     STATE.usageSeconds = 0;
-    showCatOverlay(STATE.settings.breakMinutes);
+    triggerBreakReminder(STATE.settings.breakMinutes);
   }
 }
 
@@ -148,12 +157,60 @@ function normalizeSettings(settings) {
     breakMinutes: Number.isFinite(breakMinutes)
       ? clamp(breakMinutes, 0.1, 60)
       : DEFAULT_SETTINGS.breakMinutes,
-    soundEnabled: settings?.soundEnabled === true
+    soundEnabled: settings?.soundEnabled === true,
+    teaseModeEnabled: settings?.teaseModeEnabled === true
   };
 }
 
-async function showCatOverlay(breakMinutes) {
+async function triggerBreakReminder(breakMinutes) {
   STATE.overlayLoading = true;
+
+  if (STATE.settings.teaseModeEnabled && await hasTeaseSprite()) {
+    showTeaseOverlay(breakMinutes);
+    return;
+  }
+
+  await showCatOverlay(breakMinutes);
+}
+
+async function hasTeaseSprite() {
+  if (!window.__catTease?.hasSprite) {
+    return false;
+  }
+
+  return window.__catTease.hasSprite();
+}
+
+function showTeaseOverlay(breakMinutes) {
+  const totalSeconds = Math.max(1, Math.round(breakMinutes * 60));
+  STATE.breakUntil = Date.now() + totalSeconds * 1000;
+  STATE.teaseActive = true;
+  STATE.overlayLoading = false;
+
+  window.__catTease?.start({
+    mode: "center",
+    rememberDismissed: false,
+    totalSeconds,
+    onClose: endTeaseOverlay
+  });
+
+  if (STATE.settings.soundEnabled) {
+    playSoftBeep();
+  }
+
+  window.clearTimeout(STATE.teaseTimerId);
+  STATE.teaseTimerId = window.setTimeout(endTeaseOverlay, totalSeconds * 1000);
+}
+
+function endTeaseOverlay() {
+  window.clearTimeout(STATE.teaseTimerId);
+  STATE.teaseTimerId = null;
+  STATE.teaseActive = false;
+  window.__catTease?.stop();
+}
+
+async function showCatOverlay(breakMinutes) {
+  window.__catTease?.hide();
 
   const totalSeconds = Math.max(1, Math.round(breakMinutes * 60));
   const endAt = Date.now() + totalSeconds * 1000;

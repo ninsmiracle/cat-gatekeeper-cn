@@ -15,7 +15,8 @@ const DEFAULT_SETTINGS = {
   ],
   triggerMinutes: 2,
   breakMinutes: 1,
-  soundEnabled: false
+  soundEnabled: false,
+  teaseModeEnabled: false
 };
 
 const PRESET_SITES = [
@@ -34,6 +35,7 @@ const PRESET_SITES = [
 
 const form = document.querySelector("#settings-form");
 const enabledInput = document.querySelector("#enabled");
+const teaseModeEnabledInput = document.querySelector("#tease-mode-enabled");
 const triggerMinutesInput = document.querySelector("#trigger-minutes");
 const breakMinutesInput = document.querySelector("#break-minutes");
 const targetSitesInput = document.querySelector("#target-sites");
@@ -67,6 +69,13 @@ async function init() {
   targetSitesInput.addEventListener("input", () => {
     currentSites = parseSites(targetSitesInput.value);
     syncPresetChecks();
+  });
+
+  teaseModeEnabledInput.addEventListener("change", async () => {
+    await saveSettings(readFormSettings());
+    showStatus(teaseModeEnabledInput.checked
+      ? "逗猫模式已开启，将在达到拦截时间后触发。"
+      : "逗猫模式已关闭。");
   });
 }
 
@@ -210,6 +219,7 @@ async function loadAndRenderSettings() {
 
 function renderSettings(settings) {
   enabledInput.checked = settings.enabled;
+  teaseModeEnabledInput.checked = settings.teaseModeEnabled;
   triggerMinutesInput.value = String(settings.triggerMinutes);
   breakMinutesInput.value = String(settings.breakMinutes);
   soundEnabledInput.checked = settings.soundEnabled;
@@ -224,7 +234,8 @@ function readFormSettings() {
     triggerMinutes: Number(triggerMinutesInput.value),
     breakMinutes: Number(breakMinutesInput.value),
     targetSites: parseSites(targetSitesInput.value),
-    soundEnabled: soundEnabledInput.checked
+    soundEnabled: soundEnabledInput.checked,
+    teaseModeEnabled: teaseModeEnabledInput.checked
   });
 }
 
@@ -292,7 +303,8 @@ function normalizeSettings(settings) {
     breakMinutes: Number.isFinite(breakMinutes)
       ? clamp(breakMinutes, 0.1, 60)
       : DEFAULT_SETTINGS.breakMinutes,
-    soundEnabled: settings?.soundEnabled === true
+    soundEnabled: settings?.soundEnabled === true,
+    teaseModeEnabled: settings?.teaseModeEnabled === true
   };
 }
 

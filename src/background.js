@@ -15,7 +15,8 @@ const DEFAULT_SETTINGS = {
   ],
   triggerMinutes: 2,
   breakMinutes: 1,
-  soundEnabled: false
+  soundEnabled: false,
+  teaseModeEnabled: false
 };
 
 chrome.runtime.onInstalled.addListener(async () => {
